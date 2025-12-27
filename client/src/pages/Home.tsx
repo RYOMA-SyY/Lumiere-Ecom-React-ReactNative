@@ -101,9 +101,14 @@ export default function Home() {
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent z-10" />
                 {/* Placeholder images for categories */}
                 <img 
-                  src={`https://source.unsplash.com/random/800x600?${category.toLowerCase()}`}
+                  src={
+                    category === 'Electronics' ? 'https://images.unsplash.com/photo-1550009158-9ebf69173e03?auto=format&fit=crop&q=80&w=800' :
+                    category === 'Fashion' ? 'https://images.unsplash.com/photo-1485462537746-965f33f7f6a7?auto=format&fit=crop&q=80&w=800' :
+                    'https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&q=80&w=800'
+                  }
                   className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                   alt={category}
+                  loading="lazy"
                 />
                 <div className="absolute bottom-0 left-0 p-8 z-20 w-full">
                   <h3 className="text-2xl font-bold text-white mb-2">{t(category.toLowerCase())}</h3>

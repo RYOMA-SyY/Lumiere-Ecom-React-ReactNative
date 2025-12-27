@@ -7,7 +7,7 @@ const MOCK_PRODUCTS: Product[] = [
     name: "Lumiere Classic Watch",
     price: 299,
     description: "A timeless piece for the modern individual. Features a sapphire crystal face and genuine leather strap.",
-    image: "https://images.unsplash.com/photo-1524592094714-0f0654e20314?auto=format&fit=crop&q=80&w=800",
+    image: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&q=80&w=800",
     category: "Fashion",
     stock: 15
   },
@@ -25,7 +25,7 @@ const MOCK_PRODUCTS: Product[] = [
     name: "Minimalist Desk Lamp",
     price: 89,
     description: "Illuminate your workspace with style. Adjustable brightness and color temperature.",
-    image: "https://images.unsplash.com/photo-1507473888900-52e1ad14592d?auto=format&fit=crop&q=80&w=800",
+    image: "https://images.unsplash.com/photo-1513506003901-1e6a229e2d15?auto=format&fit=crop&q=80&w=800",
     category: "Home",
     stock: 25
   },
@@ -43,7 +43,7 @@ const MOCK_PRODUCTS: Product[] = [
     name: "Smart Home Hub",
     price: 129,
     description: "Control your entire home with voice commands. Compatible with all major smart devices.",
-    image: "https://images.unsplash.com/photo-1558002038-1091a1661116?auto=format&fit=crop&q=80&w=800",
+    image: "https://images.unsplash.com/photo-1593784991095-a205069470b6?auto=format&fit=crop&q=80&w=800",
     category: "Electronics",
     stock: 5
   },
@@ -52,7 +52,7 @@ const MOCK_PRODUCTS: Product[] = [
     name: "Ceramic Vase Set",
     price: 65,
     description: "A set of 3 handcrafted ceramic vases. Perfect for adding a touch of elegance to any room.",
-    image: "https://images.unsplash.com/photo-1581783342308-f792ca11df53?auto=format&fit=crop&q=80&w=800",
+    image: "https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?auto=format&fit=crop&q=80&w=800",
     category: "Home",
     stock: 20
   }
