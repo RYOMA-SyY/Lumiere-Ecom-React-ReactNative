@@ -6,33 +6,70 @@ import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
 import { motion } from "framer-motion";
 import { User, Mail, Lock, Eye, EyeOff } from "lucide-react";
+import { validateEmail, validatePassword } from "../lib/validation";
+import { toast } from "sonner";
 
 export default function Register() {
   const { t } = useTranslation();
   const [, setLocation] = useLocation();
   const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     password: "",
   });
+  const [errors, setErrors] = useState<{ name?: string; email?: string; password?: string[] }>({});
+
+  const validateForm = () => {
+    const newErrors: typeof errors = {};
+    
+    if (!formData.name.trim()) {
+      newErrors.name = "Full name is required";
+    }
+    
+    if (!formData.email.trim()) {
+      newErrors.email = "Email is required";
+    } else if (!validateEmail(formData.email)) {
+      newErrors.email = "Please enter a valid email address";
+    }
+    
+    if (!formData.password) {
+      newErrors.password = ["Password is required"];
+    } else {
+      const { valid, errors: pwErrors } = validatePassword(formData.password);
+      if (!valid) {
+        newErrors.password = pwErrors;
+      }
+    }
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+    if (errors[name as keyof typeof errors]) {
+      setErrors({ ...errors, [name]: undefined });
+    }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (formData.name && formData.email && formData.password) {
+    
+    if (!validateForm()) return;
+    
+    setIsLoading(true);
+    setTimeout(() => {
+      setIsLoading(false);
+      toast.success("Account created successfully!");
       setLocation("/profile");
-    }
+    }, 1000);
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4">
+    <div className="min-h-screen flex items-center justify-center px-4 py-8">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -44,7 +81,7 @@ export default function Register() {
             <p className="text-muted-foreground">Join Lumiere and start shopping</p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-5">
+          <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="name">Full Name</Label>
               <div className="relative">
@@ -56,13 +93,16 @@ export default function Register() {
                   value={formData.name}
                   onChange={handleChange}
                   className="pl-10 rtl:pl-3 rtl:pr-10"
+                  error={!!errors.name}
+                  errorMessage={errors.name}
+                  disabled={isLoading}
                   required
                 />
               </div>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="email">{t("language") === "ar" ? "البريد الإلكتروني" : "Email"}</Label>
+              <Label htmlFor="email">Email</Label>
               <div className="relative">
                 <Mail className="absolute left-3 top-3 h-5 w-5 text-muted-foreground rtl:left-auto rtl:right-3" />
                 <Input
@@ -73,6 +113,9 @@ export default function Register() {
                   value={formData.email}
                   onChange={handleChange}
                   className="pl-10 rtl:pl-3 rtl:pr-10"
+                  error={!!errors.email}
+                  errorMessage={errors.email}
+                  disabled={isLoading}
                   required
                 />
               </div>
@@ -90,21 +133,36 @@ export default function Register() {
                   value={formData.password}
                   onChange={handleChange}
                   className="pl-10 pr-10 rtl:pl-10 rtl:pr-10"
+                  error={!!errors.password}
+                  disabled={isLoading}
                   required
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3 top-3 text-muted-foreground hover:text-foreground rtl:left-3 rtl:right-auto"
+                  disabled={isLoading}
                 >
                   {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                 </button>
               </div>
-              <p className="text-xs text-muted-foreground">At least 8 characters</p>
+              {errors.password && (
+                <ul className="text-sm text-destructive space-y-1">
+                  {errors.password.map((error, i) => (
+                    <li key={i}>• {error}</li>
+                  ))}
+                </ul>
+              )}
             </div>
 
-            <Button type="submit" size="lg" className="w-full h-12 text-lg rounded-xl mt-2">
-              Create Account
+            <Button 
+              type="submit" 
+              size="lg" 
+              className="w-full h-12 text-lg rounded-xl mt-4"
+              disabled={isLoading}
+              data-testid="button-register"
+            >
+              {isLoading ? "Creating account..." : "Create Account"}
             </Button>
           </form>
 
@@ -129,7 +187,7 @@ export default function Register() {
           <div className="text-center text-sm text-muted-foreground space-y-2">
             <p>Already have an account?</p>
             <Link href="/login">
-              <Button variant="link" className="text-primary">
+              <Button variant="link" className="text-primary p-0 h-auto">
                 Sign in here
               </Button>
             </Link>

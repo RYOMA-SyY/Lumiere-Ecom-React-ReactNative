@@ -5,24 +5,53 @@ import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
 import { motion } from "framer-motion";
-import { Mail, Lock, Eye, EyeOff } from "lucide-react";
+import { Mail, Lock, Eye, EyeOff, AlertCircle } from "lucide-react";
+import { validateEmail } from "../lib/validation";
+import { toast } from "sonner";
 
 export default function Login() {
   const { t } = useTranslation();
   const [, setLocation] = useLocation();
   const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
+
+  const validateForm = () => {
+    const newErrors: typeof errors = {};
+    
+    if (!email.trim()) {
+      newErrors.email = "Email is required";
+    } else if (!validateEmail(email)) {
+      newErrors.email = "Please enter a valid email address";
+    }
+    
+    if (!password) {
+      newErrors.password = "Password is required";
+    } else if (password.length < 6) {
+      newErrors.password = "Password must be at least 6 characters";
+    }
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (email && password) {
+    
+    if (!validateForm()) return;
+    
+    setIsLoading(true);
+    setTimeout(() => {
+      setIsLoading(false);
+      toast.success("Successfully logged in!");
       setLocation("/profile");
-    }
+    }, 1000);
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4">
+    <div className="min-h-screen flex items-center justify-center px-4 py-8">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -34,9 +63,9 @@ export default function Login() {
             <p className="text-muted-foreground">Welcome back to Lumiere</p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-5">
             <div className="space-y-2">
-              <Label htmlFor="email">{t("language") === "ar" ? "البريد الإلكتروني" : "Email"}</Label>
+              <Label htmlFor="email">Email</Label>
               <div className="relative">
                 <Mail className="absolute left-3 top-3 h-5 w-5 text-muted-foreground rtl:left-auto rtl:right-3" />
                 <Input
@@ -44,8 +73,14 @@ export default function Login() {
                   type="email"
                   placeholder="you@example.com"
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={(e) => {
+                    setEmail(e.target.value);
+                    if (errors.email) setErrors({ ...errors, email: undefined });
+                  }}
                   className="pl-10 rtl:pl-3 rtl:pr-10"
+                  error={!!errors.email}
+                  errorMessage={errors.email}
+                  disabled={isLoading}
                   required
                 />
               </div>
@@ -60,22 +95,35 @@ export default function Login() {
                   type={showPassword ? "text" : "password"}
                   placeholder="••••••••"
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  onChange={(e) => {
+                    setPassword(e.target.value);
+                    if (errors.password) setErrors({ ...errors, password: undefined });
+                  }}
                   className="pl-10 pr-10 rtl:pl-10 rtl:pr-10"
+                  error={!!errors.password}
+                  errorMessage={errors.password}
+                  disabled={isLoading}
                   required
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3 top-3 text-muted-foreground hover:text-foreground rtl:left-3 rtl:right-auto"
+                  disabled={isLoading}
                 >
                   {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                 </button>
               </div>
             </div>
 
-            <Button type="submit" size="lg" className="w-full h-12 text-lg rounded-xl">
-              {t("login")}
+            <Button 
+              type="submit" 
+              size="lg" 
+              className="w-full h-12 text-lg rounded-xl"
+              disabled={isLoading}
+              data-testid="button-login"
+            >
+              {isLoading ? "Signing in..." : t("login")}
             </Button>
           </form>
 
@@ -100,7 +148,7 @@ export default function Login() {
           <div className="text-center text-sm text-muted-foreground space-y-2">
             <p>Don't have an account?</p>
             <Link href="/register">
-              <Button variant="link" className="text-primary">
+              <Button variant="link" className="text-primary p-0 h-auto">
                 Create one now
               </Button>
             </Link>
