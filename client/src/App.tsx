@@ -8,6 +8,7 @@ import Home from "./pages/Home";
 import ProductListing from "./pages/ProductListing";
 import ProductDetail from "./pages/ProductDetail";
 import Cart from "./pages/Cart";
+import Checkout from "./pages/Checkout";
 import { Header } from "./components/layout/Header";
 import { Footer } from "./components/layout/Footer";
 
@@ -24,6 +25,7 @@ function Router() {
           <Route path="/shop" component={ProductListing} />
           <Route path="/product/:id" component={ProductDetail} />
           <Route path="/cart" component={Cart} />
+          <Route path="/checkout" component={Checkout} />
           <Route component={NotFound} />
         </Switch>
       </main>

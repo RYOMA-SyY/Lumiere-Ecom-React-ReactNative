@@ -8,12 +8,16 @@ import { Button } from "../components/ui/button";
 import { Badge } from "../components/ui/badge";
 import { Minus, Plus, ShoppingCart, Truck, Shield } from "lucide-react";
 import { Skeleton } from "../components/ui/skeleton";
+import { WishlistButton } from "../components/shared/Wishlist";
+import { ReviewSection } from "../components/shared/ProductReview";
+import { motion } from "framer-motion";
 
 export default function ProductDetail() {
   const [, params] = useRoute("/product/:id");
   const { t } = useTranslation();
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
+  const [quantity, setQuantity] = useState(1);
   const addToCart = useStore((state) => state.addToCart);
 
   useEffect(() => {
@@ -24,6 +28,14 @@ export default function ProductDetail() {
       });
     }
   }, [params?.id]);
+
+  const handleAddToCart = () => {
+    if (product) {
+      for (let i = 0; i < quantity; i++) {
+        addToCart(product);
+      }
+    }
+  };
 
   if (loading) {
     return (
@@ -42,20 +54,29 @@ export default function ProductDetail() {
 
   return (
     <div className="container mx-auto px-4 py-12">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-start">
-        {/* Image */}
-        <div className="bg-muted rounded-2xl overflow-hidden aspect-square border border-border/50">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-start mb-16">
+        {/* Image Gallery */}
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="bg-muted rounded-2xl overflow-hidden aspect-square border border-border/50 group"
+        >
           <img 
             src={product.image} 
             alt={product.name} 
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
           />
-        </div>
+        </motion.div>
 
-        {/* Info */}
-        <div className="space-y-8">
+        {/* Product Info */}
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="space-y-8"
+        >
           <div>
-            <div className="flex items-center gap-2 mb-4">
+            <div className="flex items-center gap-2 mb-4 flex-wrap">
               <Badge variant="secondary" className="text-xs uppercase tracking-wide">
                 {product.category}
               </Badge>
@@ -71,35 +92,68 @@ export default function ProductDetail() {
             </div>
             
             <h1 className="text-4xl font-bold text-foreground mb-4">{product.name}</h1>
-            <p className="text-3xl font-bold text-primary">${product.price.toFixed(2)}</p>
+            <p className="text-4xl font-bold text-primary">${product.price.toFixed(2)}</p>
           </div>
 
-          <p className="text-lg text-muted-foreground leading-relaxed">
+          <p className="text-lg text-muted-foreground leading-relaxed border-b border-border pb-8">
             {product.description}
           </p>
 
+          {/* Quantity Selector */}
+          <div className="flex items-center gap-4">
+            <span className="text-sm font-medium text-muted-foreground">Quantity:</span>
+            <div className="flex items-center gap-3 border border-border rounded-lg p-1">
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="h-8 w-8 rounded-md"
+                onClick={() => setQuantity(Math.max(1, quantity - 1))}
+              >
+                <Minus className="h-4 w-4" />
+              </Button>
+              <span className="w-8 text-center font-semibold">{quantity}</span>
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="h-8 w-8 rounded-md"
+                onClick={() => setQuantity(quantity + 1)}
+              >
+                <Plus className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+
+          {/* Add to Cart */}
           <div className="flex gap-4 pt-4 border-t border-border">
-            <Button size="lg" className="flex-1 h-14 text-lg rounded-xl" onClick={() => addToCart(product)}>
+            <Button 
+              size="lg" 
+              className="flex-1 h-14 text-lg rounded-xl" 
+              onClick={handleAddToCart}
+              disabled={product.stock === 0}
+              data-testid={`button-add-cart-${product.id}`}
+            >
               <ShoppingCart className="mr-2 h-5 w-5" />
               {t("add_to_cart")}
             </Button>
-            <Button variant="outline" size="lg" className="h-14 w-14 rounded-xl p-0">
-              <Shield className="h-5 w-5" />
-            </Button>
+            <WishlistButton productId={product.id} />
           </div>
 
-          <div className="grid grid-cols-2 gap-4 text-sm text-muted-foreground">
+          {/* Badges */}
+          <div className="grid grid-cols-2 gap-4 text-sm text-muted-foreground p-4 bg-muted/30 rounded-lg">
             <div className="flex items-center gap-2">
-              <Truck className="h-4 w-4" />
+              <Truck className="h-4 w-4 text-primary" />
               <span>Free worldwide shipping</span>
             </div>
             <div className="flex items-center gap-2">
-              <Shield className="h-4 w-4" />
+              <Shield className="h-4 w-4 text-primary" />
               <span>2 year warranty</span>
             </div>
           </div>
-        </div>
+        </motion.div>
       </div>
+
+      {/* Reviews Section */}
+      <ReviewSection />
     </div>
   );
 }
