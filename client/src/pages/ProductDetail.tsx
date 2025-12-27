@@ -10,7 +10,10 @@ import { Minus, Plus, ShoppingCart, Truck, Shield } from "lucide-react";
 import { Skeleton } from "../components/ui/skeleton";
 import { WishlistButton } from "../components/shared/Wishlist";
 import { ReviewSection } from "../components/shared/ProductReview";
+import { Breadcrumb } from "../components/shared/Breadcrumb";
+import { RelatedProducts } from "../components/shared/RelatedProducts";
 import { motion } from "framer-motion";
+import { toast } from "sonner";
 
 export default function ProductDetail() {
   const [, params] = useRoute("/product/:id");
@@ -34,6 +37,8 @@ export default function ProductDetail() {
       for (let i = 0; i < quantity; i++) {
         addToCart(product);
       }
+      toast.success(`${quantity} ${quantity === 1 ? 'item' : 'items'} added to cart!`);
+      setQuantity(1);
     }
   };
 
@@ -50,21 +55,29 @@ export default function ProductDetail() {
     );
   }
 
-  if (!product) return <div className="container py-12 text-center">Product not found</div>;
+  if (!product) return <div className="container py-12 text-center text-muted-foreground">Product not found</div>;
 
   return (
     <div className="container mx-auto px-4 py-12">
+      {/* Breadcrumb */}
+      <Breadcrumb items={[
+        { label: t("breadcrumb_home"), href: "/" },
+        { label: t("breadcrumb_shop"), href: "/shop" },
+        { label: product.name },
+      ]} />
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-start mb-16">
         {/* Image Gallery */}
         <motion.div 
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="bg-muted rounded-2xl overflow-hidden aspect-square border border-border/50 group"
+          className="bg-muted rounded-2xl overflow-hidden aspect-square border border-border/50 group cursor-zoom-in"
         >
           <img 
             src={product.image} 
             alt={product.name} 
-            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-125"
+            loading="lazy"
           />
         </motion.div>
 
@@ -108,6 +121,8 @@ export default function ProductDetail() {
                 size="icon" 
                 className="h-8 w-8 rounded-md"
                 onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                disabled={product.stock === 0}
+                aria-label="Decrease quantity"
               >
                 <Minus className="h-4 w-4" />
               </Button>
@@ -117,6 +132,8 @@ export default function ProductDetail() {
                 size="icon" 
                 className="h-8 w-8 rounded-md"
                 onClick={() => setQuantity(quantity + 1)}
+                disabled={product.stock === 0}
+                aria-label="Increase quantity"
               >
                 <Plus className="h-4 w-4" />
               </Button>
@@ -127,25 +144,26 @@ export default function ProductDetail() {
           <div className="flex gap-4 pt-4 border-t border-border">
             <Button 
               size="lg" 
-              className="flex-1 h-14 text-lg rounded-xl" 
+              className="flex-1 h-14 text-lg rounded-xl transition-all duration-200 hover:scale-102 active:scale-98" 
               onClick={handleAddToCart}
               disabled={product.stock === 0}
               data-testid={`button-add-cart-${product.id}`}
+              aria-label={`Add ${quantity} item(s) to cart`}
             >
               <ShoppingCart className="mr-2 h-5 w-5" />
-              {t("add_to_cart")}
+              {product.stock === 0 ? t("out_of_stock") : t("add_to_cart")}
             </Button>
             <WishlistButton productId={product.id} />
           </div>
 
-          {/* Badges */}
+          {/* Info Badges */}
           <div className="grid grid-cols-2 gap-4 text-sm text-muted-foreground p-4 bg-muted/30 rounded-lg">
             <div className="flex items-center gap-2">
-              <Truck className="h-4 w-4 text-primary" />
+              <Truck className="h-4 w-4 text-primary flex-shrink-0" />
               <span>Free worldwide shipping</span>
             </div>
             <div className="flex items-center gap-2">
-              <Shield className="h-4 w-4 text-primary" />
+              <Shield className="h-4 w-4 text-primary flex-shrink-0" />
               <span>2 year warranty</span>
             </div>
           </div>
@@ -154,6 +172,9 @@ export default function ProductDetail() {
 
       {/* Reviews Section */}
       <ReviewSection />
+
+      {/* Related Products */}
+      <RelatedProducts currentProductId={product.id} category={product.category} />
     </div>
   );
 }
