@@ -1,7 +1,7 @@
 import { Link, useLocation } from "wouter";
 import { useStore } from "../../lib/store";
 import { useTranslation } from "react-i18next";
-import { ShoppingCart, Menu, Search, User as UserIcon, Globe } from "lucide-react";
+import { ShoppingCart, Menu, User as UserIcon, Globe } from "lucide-react";
 import { Button } from "../ui/button";
 import {
   DropdownMenu,
@@ -10,14 +10,15 @@ import {
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
 import { Badge } from "../ui/badge";
-import { Input } from "../ui/input";
 import { useState } from "react";
+import { SearchBar } from "../shared/SearchBar";
 
 export function Header() {
   const { t, i18n } = useTranslation();
   const [location, setLocation] = useLocation();
   const cart = useStore((state) => state.cart);
   const setLanguage = useStore((state) => state.setLanguage);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   
   const cartItemCount = cart.reduce((acc, item) => acc + item.quantity, 0);
 
@@ -34,9 +35,9 @@ export function Header() {
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto px-4 h-16 flex items-center justify-between gap-4">
         {/* Logo */}
-        <Link href="/" className="font-bold text-2xl tracking-tight text-primary flex items-center gap-2">
-            <span className="bg-primary text-primary-foreground w-8 h-8 rounded-lg flex items-center justify-center font-serif italic">L</span>
-            Lumiere
+        <Link href="/" className="font-bold text-2xl tracking-tight text-primary flex items-center gap-2 flex-shrink-0">
+            <span className="bg-primary text-primary-foreground w-8 h-8 rounded-lg flex items-center justify-center font-serif italic text-sm">L</span>
+            <span className="hidden sm:inline">Lumiere</span>
         </Link>
 
         {/* Desktop Nav */}
@@ -54,23 +55,21 @@ export function Header() {
           ))}
         </nav>
 
-        {/* Search Bar - Hidden on mobile */}
-        <div className="hidden md:flex flex-1 max-w-sm relative">
-          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground rtl:right-2.5 rtl:left-auto" />
-          <Input 
-            type="search" 
-            placeholder={t("search")} 
-            className="pl-9 bg-muted/50 border-none focus-visible:ring-1 rtl:pr-9 rtl:pl-3"
-          />
-        </div>
+        {/* Search Bar - Desktop */}
+        <SearchBar />
 
         {/* Actions */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-shrink-0">
           
           {/* Language Switcher */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="text-muted-foreground">
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="text-muted-foreground hover:text-foreground"
+                aria-label="Change language"
+              >
                 <Globe className="h-5 w-5" />
               </Button>
             </DropdownMenuTrigger>
@@ -81,29 +80,81 @@ export function Header() {
             </DropdownMenuContent>
           </DropdownMenu>
 
+          {/* Cart */}
           <Link href="/cart">
-            <Button variant="ghost" size="icon" className="relative text-muted-foreground hover:text-primary" data-testid="button-cart">
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="relative text-muted-foreground hover:text-primary" 
+              data-testid="button-cart"
+              aria-label={`Shopping cart with ${cartItemCount} items`}
+            >
               <ShoppingCart className="h-5 w-5" />
               {cartItemCount > 0 && (
-                <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-[10px]">
+                <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-[10px] font-bold">
                   {cartItemCount}
                 </Badge>
               )}
             </Button>
           </Link>
 
+          {/* Profile - Desktop */}
           <Link href="/profile">
-            <Button variant="ghost" size="icon" className="hidden md:flex text-muted-foreground hover:text-primary">
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="hidden md:flex text-muted-foreground hover:text-primary"
+              aria-label="User profile"
+            >
               <UserIcon className="h-5 w-5" />
             </Button>
           </Link>
 
-          {/* Mobile Menu Trigger */}
-          <Button variant="ghost" size="icon" className="md:hidden text-muted-foreground">
+          {/* Mobile Menu Toggle */}
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="md:hidden text-muted-foreground"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            aria-label="Toggle menu"
+          >
             <Menu className="h-5 w-5" />
           </Button>
         </div>
       </div>
+
+      {/* Mobile Menu */}
+      {mobileMenuOpen && (
+        <div className="md:hidden border-t border-border bg-background">
+          <div className="container mx-auto px-4 py-4 space-y-4">
+            <SearchBar isMobile />
+            
+            <nav className="space-y-2">
+              {navLinks.map((link) => (
+                <Link 
+                  key={link.href} 
+                  href={link.href}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className={`block px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    location === link.href 
+                      ? "bg-primary/10 text-primary" 
+                      : "text-muted-foreground hover:bg-muted"
+                  }`}
+                >
+                  {link.label}
+                </Link>
+              ))}
+              <Link 
+                href="/profile"
+                onClick={() => setMobileMenuOpen(false)}
+                className="block px-4 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:bg-muted transition-colors"
+              >
+                {t("profile")}
+              </Link>
+            </nav>
+          </div>
+        </div>
+      )}
     </header>
   );
 }
