@@ -222,7 +222,37 @@ To integrate with a real API:
 
 ## 🚀 Deployment
 
-### Vercel (Recommended)
+### Prerequisites
+1. **Build the application**:
+   ```bash
+   npm run build
+   ```
+
+2. **Set environment variables** (create `.env` file):
+   ```env
+   PORT=5000
+   NODE_ENV=production
+   DATABASE_URL=postgresql://user:password@host:port/database
+   VITE_DEPLOYMENT_URL=https://your-domain.com  # Optional
+   ```
+
+### Deployment Options
+
+#### Option 1: Node.js Server (Recommended for Full-Stack)
+```bash
+# Build
+npm run build
+
+# Start production server
+npm start
+```
+
+The server will:
+- Serve the built frontend from `dist/public`
+- Handle API routes
+- Listen on the port specified by `PORT` env var (default: 5000)
+
+#### Option 2: Vercel
 ```bash
 # Install Vercel CLI
 npm i -g vercel
@@ -231,29 +261,83 @@ npm i -g vercel
 vercel
 ```
 
-### Netlify
-```bash
-# Build
-npm run build
+**Note**: For Vercel, you may need to configure:
+- Build command: `npm run build`
+- Output directory: `dist/public`
+- Install command: `npm install`
 
-# Deploy dist/ folder to Netlify
+#### Option 3: Netlify (UI Only - Recommended for Frontend)
+The project includes a `netlify.toml` configuration file for easy deployment.
+
+**Quick Deploy:**
+1. **Connect your GitHub repository** to Netlify:
+   - Go to [Netlify](https://www.netlify.com)
+   - Click "Add new site" → "Import an existing project"
+   - Connect your GitHub repository
+   - Netlify will automatically detect the `netlify.toml` configuration
+
+2. **Deploy settings** (auto-configured via `netlify.toml`):
+   - Build command: `npm run build:client`
+   - Publish directory: `dist/public`
+   - Node version: 20 (set in Netlify dashboard if needed)
+
+3. **Optional Environment Variables** (in Netlify dashboard):
+   ```
+   VITE_DEPLOYMENT_URL=https://your-site.netlify.app
+   ```
+
+**Manual Deploy:**
+```bash
+# Build client only
+npm run build:client
+
+# Deploy dist/public folder to Netlify via CLI or drag-and-drop
 ```
 
-### Docker
-```bash
-# Build production bundle
-npm run build
+**Note**: This deploys only the frontend UI. The backend server is not included.
 
-# Serve with any static host
+#### Option 4: Docker
+Create a `Dockerfile`:
+```dockerfile
+FROM node:20-alpine
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci --only=production
+COPY . .
+RUN npm run build
+EXPOSE 5000
+CMD ["npm", "start"]
+```
+
+Then:
+```bash
+docker build -t lumiere-ecommerce .
+docker run -p 5000:5000 -e DATABASE_URL=your_db_url lumiere-ecommerce
 ```
 
 ### Environment Variables
-Currently not required (mock data). To add backend integration:
 
-```env
-VITE_API_URL=https://api.example.com
-VITE_API_KEY=your_api_key
-```
+**Required:**
+- `DATABASE_URL` - PostgreSQL connection string (required for database operations)
+  - Format: `postgresql://user:password@host:port/database`
+
+**Optional:**
+- `PORT` - Server port (default: 5000)
+- `NODE_ENV` - Set to `production` for production builds
+- `VITE_DEPLOYMENT_URL` - Full URL for OpenGraph meta images (e.g., `https://yourdomain.com`)
+
+### Database Setup
+
+1. **Provision a PostgreSQL database** (e.g., Supabase, Railway, Neon, or self-hosted)
+
+2. **Run database migrations**:
+   ```bash
+   npm run db:push
+   ```
+
+3. **Update storage** - Currently using in-memory storage. For production:
+   - Replace `MemStorage` in `server/storage.ts` with database-backed storage
+   - Implement proper user authentication and session management
 
 ## ♿ Accessibility Features
 
