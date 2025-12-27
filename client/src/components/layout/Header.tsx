@@ -92,9 +92,11 @@ export function Header() {
             </Button>
           </Link>
 
-          <Button variant="ghost" size="icon" className="hidden md:flex text-muted-foreground">
-            <UserIcon className="h-5 w-5" />
-          </Button>
+          <Link href="/profile">
+            <Button variant="ghost" size="icon" className="hidden md:flex text-muted-foreground hover:text-primary">
+              <UserIcon className="h-5 w-5" />
+            </Button>
+          </Link>
 
           {/* Mobile Menu Trigger */}
           <Button variant="ghost" size="icon" className="md:hidden text-muted-foreground">

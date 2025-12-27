@@ -1,0 +1,297 @@
+Project Overview
+Create a full-featured e-commerce application that supports Arabic (RTL), French, and English languages, running on both web (React) and mobile (React Native) platforms. Use the provided Figma design as the UI reference. Implement using MVC architecture with the code sharing strategy (Option 4).
+
+Technical Requirements
+1. Project Structure (Monorepo)
+text
+ecommerce-app/
+├── packages/
+│   ├── shared/           # Shared code between web and native
+│   │   ├── src/
+│   │   │   ├── models/           # Data models (Product, User, Cart, Order)
+│   │   │   ├── controllers/      # Business logic controllers
+│   │   │   ├── services/         # API services, utilities
+│   │   │   ├── i18n/             # Localization files (ar, fr, en)
+│   │   │   └── utils/            # Shared utilities
+│   │   └── package.json
+│   ├── web/             # React web application
+│   │   ├── src/
+│   │   │   ├── components/
+│   │   │   │   ├── shared/       # Import from shared components
+│   │   │   │   └── web/          # Web-specific components
+│   │   │   ├── screens/          # Web screens/pages
+│   │   │   └── App.jsx
+│   │   └── package.json
+│   └── native/          # React Native mobile app
+│       ├── src/
+│       │   ├── components/
+│       │   │   ├── shared/       # Import from shared components
+│       │   │   └── native/       # Native-specific components
+│       │   ├── screens/          # Mobile screens
+│       │   └── App.js
+│       └── package.json
+└── package.json          # Root monorepo config
+2. MVC Architecture Implementation
+Models (shared):
+
+Product: id, name, price, images, description, category, stock
+
+User: id, name, email, addresses, preferences
+
+Cart: items, total, currency
+
+Order: orderId, items, total, status, shippingAddress
+
+Category: id, name, image, subcategories
+
+Controllers (shared):
+
+ProductController.js: Fetch products, filter, search
+
+CartController.js: Add/remove items, calculate totals
+
+UserController.js: Authentication, profile management
+
+OrderController.js: Checkout, order history
+
+LocalizationController.js: Language switching, RTL handling
+
+Views (platform-specific):
+
+Web: React components with CSS/Styled-components
+
+Native: React Native components with StyleSheet
+
+3. Multi-Language & RTL Support
+javascript
+// shared/i18n/
+├── translations/
+│   ├── en.json
+│   ├── fr.json
+│   └── ar.json
+├── i18nConfig.js
+└── RTLWrapper.js  # Handles Arabic RTL layout switching
+Requirements:
+
+Language switcher in header
+
+RTL support for Arabic (flip layouts, alignments)
+
+Localized currency and dates
+
+Dynamic font loading for Arabic script
+
+4. UI/UX from Figma Design
+Implement these screens from the Figma design:
+
+Shared Screens:
+
+Home screen with hero banner
+
+Product listing with filters
+
+Product detail page
+
+Shopping cart
+
+Checkout process
+
+User profile
+
+Platform-specific optimizations:
+
+Web: Desktop-optimized layouts, hover states
+
+Mobile: Touch-optimized, swipe gestures, mobile navigation
+
+5. Shared Components Structure
+javascript
+// packages/shared/src/components/
+├── shared/
+│   ├── ProductCard/          # Works on both web and native
+│   │   ├── ProductCard.jsx   # Main component
+│   │   ├── ProductCard.native.jsx  # Native-specific tweaks
+│   │   ├── ProductCard.web.jsx     # Web-specific tweaks
+│   │   └── styles.js         # Shared styling logic
+│   ├── Button/
+│   ├── Input/
+│   ├── Header/
+│   ├── Footer/
+│   └── CategoryCard/
+6. Platform Detection & Conditional Rendering
+javascript
+// Example: Shared component with platform-specific rendering
+import { Platform } from 'react-native';
+import WebButton from './Button.web';
+import NativeButton from './Button.native';
+
+const Button = Platform.select({
+  web: () => require('./Button.web').default,
+  native: () => require('./Button.native').default,
+})();
+
+// OR using file extensions automatically:
+// Button.web.js and Button.native.js
+7. State Management
+Use Zustand or Redux Toolkit for shared state
+
+Persistent cart across sessions
+
+User authentication state
+
+Language preferences
+
+8. Navigation
+Web: React Router v6 with nested routes
+
+Mobile: React Navigation (Stack, Tab, Drawer)
+
+Shared navigation configuration where possible
+
+9. API Integration
+Shared API service layer (Axios/Fetch)
+
+Mock API for development (JSON Server/MirageJS)
+
+Real API integration with error handling
+
+10. Styling Strategy
+javascript
+// Shared styling utilities
+// packages/shared/src/utils/styles.js
+
+export const colors = {
+  primary: '#FF6B6B',
+  secondary: '#4ECDC4',
+  // ... from Figma design system
+};
+
+export const typography = {
+  fontFamily: {
+    en: 'Inter, sans-serif',
+    ar: 'Cairo, sans-serif',
+    fr: 'Montserrat, sans-serif',
+  },
+};
+
+// Platform-specific styling
+// Web: CSS-in-JS (Styled-components/Emotion)
+// Native: React Native StyleSheet
+11. Required Features
+Core E-commerce Features:
+
+Product catalog with categories
+
+Product search and filtering
+
+Shopping cart with persistent storage
+
+Multi-step checkout
+
+User authentication (login/register)
+
+Order history and tracking
+
+Wishlist functionality
+
+Product reviews and ratings
+
+Payment gateway integration (Stripe/PayPal mock)
+
+Push notifications (mobile)
+
+Multi-language Features:
+
+Language switcher in header
+
+RTL layout switching for Arabic
+
+Localized content (product descriptions, categories)
+
+Currency formatting based on language
+
+Date/time localization
+
+12. Development Setup Requirements
+Tools:
+
+Monorepo management: Turborepo or Nx
+
+Package manager: Yarn or PNPM workspaces
+
+TypeScript for type safety
+
+ESLint & Prettier for code quality
+
+Build Configuration:
+
+Web: Vite or Next.js
+
+Mobile: Expo for cross-platform (iOS & Android)
+
+13. Testing Strategy
+Unit tests for shared controllers/services
+
+Component tests with React Testing Library
+
+E2E tests with Cypress (web) and Detox (mobile)
+
+14. Performance Requirements
+Web: Lighthouse score > 90
+
+Mobile: 60fps smooth animations
+
+Image optimization and lazy loading
+
+Code splitting for web
+
+Bundle size optimization for mobile
+
+15. Deliverables
+Fully functional web application
+
+Mobile apps for iOS and Android (via Expo)
+
+Complete documentation
+
+Deployment configuration
+
+Testing suite
+
+16. Additional Considerations
+Accessibility (WCAG compliance)
+
+SEO optimization for web
+
+App Store/Play Store compliance for mobile
+
+Offline support for mobile
+
+Analytics integration
+
+Error tracking (Sentry)
+
+Implementation Priority
+Phase 1: Setup monorepo, shared models, i18n infrastructure
+
+Phase 2: Shared components, basic navigation
+
+Phase 3: Core screens (Home, Products, Cart)
+
+Phase 4: User auth, checkout, orders
+
+Phase 5: Polish, testing, optimization
+
+Success Criteria
+80% code sharing between web and mobile
+
+Consistent UI/UX across platforms following Figma design
+
+Smooth RTL transition for Arabic
+
+Performance targets met on all platforms
+
+Full test coverage for shared code
+
+Note: Focus on creating a seamless shopping experience across all platforms while maintaining platform-specific best practices. The Figma design should guide visual implementation while adapting appropriately for each platform's interaction patterns.
+
